@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="task2.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Style x:Key="fontname" TargetType="Label" >
+                <Setter Property="FontFamily" >
+                    <Setter.Value >
+                        <OnPlatform x:TypeArguments="x:String">
+                            <On Platform="iOS">Roboto-Bold</On>
+                            <On Platform="Android">Roboto-Bold.ttf#Roboto-Bold</On>
+                        </OnPlatform>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Color x:Key="darkgrey" x:FactoryMethod="FromHex">
+                <x:Arguments>
+                    <x:String>#4a4a4a</x:String>
+                </x:Arguments>
+            </Color>
+            <Color x:Key="orange" x:FactoryMethod="FromHex">
+                <x:Arguments>
+                    <x:String>#FF001B</x:String>
+                </x:Arguments>
+            </Color>
+            <Color x:Key="darggrey2" x:FactoryMethod="FromHex">
+                <x:Arguments>
+                    <x:String>#f324253d</x:String>
+                </x:Arguments>
+            </Color>
+            <Color x:Key="darggrey3" x:FactoryMethod="FromHex">
+                <x:Arguments>
+                    <x:String>#24253d</x:String>
+                </x:Arguments>
+            </Color>
+            <Color x:Key="lightgrey" x:FactoryMethod="FromHex">
+                <x:Arguments>
+                    <x:String>#d6d6d6</x:String>
+                </x:Arguments>
+            </Color>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
