@@ -74,7 +74,7 @@
                                 ItemsSource="{Binding JobsList}"
                            >
                 <ListView.Behaviors>
-                    <extendedInfiniteScrolling:InfiniteScrollBehavior IsLoadingMore="{Binding IsBusy}"/>
+                    <extendedInfiniteScrolling:InfiniteScrollBehavior />
                     <behavior:DisableListItemSelectionBehavior/>
                 </ListView.Behaviors>
                 <ListView.ItemTemplate>
@@ -129,11 +129,11 @@
                 <ListView.Footer>
                     <Grid >
                         <ActivityIndicator 
-                                        HeightRequest="16"
-                                        WidthRequest="16"
+                                        HeightRequest="20"
+                                        WidthRequest="20"
                                         HorizontalOptions="CenterAndExpand"
                                         VerticalOptions="End"
-                                        Color="{StaticResource darkgrey}"
+                                        Color="Gray"
                                         IsRunning="{Binding IsLoadingIndicator}"/>
                     </Grid>
                 </ListView.Footer>

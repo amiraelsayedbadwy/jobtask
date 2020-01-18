@@ -89,6 +89,7 @@ namespace task2.ViewModels
         }
         public async Task<ObservableCollection<JobEmployerDataModel>> GetData(int pagenumber)
         {
+            GetJobList = new ObservableCollection<JobEmployerDataModel>();
             PageSourceModel data = new PageSourceModel
             {
                 pageSource = 1,
@@ -129,25 +130,27 @@ namespace task2.ViewModels
             var Response = RestService.For<ITaskApi>("http://108.60.209.97/JobShop/api");
 
             var result = await Response.JobVacancy(data);
-
-            foreach (var item in result.data)
+            if (result.data.Count > 0)
             {
-                GetJobList.Add(new JobEmployerDataModel
+                foreach (var item in result.data)
                 {
 
-                    id = item.id,
-                    createdDate = item.createdDate,
-                    contactPerson = item.jobEmployer.contactPerson,
-                    companyLogo = item.jobEmployer.companyLogo,
-                    companyName = item.jobEmployer.companyName,
-                    fullAddress = item.jobEmployer.fullAddress,
-                    isFavourite = item.isFavorit,
+                    GetJobList.Add(new JobEmployerDataModel
+                    {
 
-                });
+                        id = item.id,
+                        createdDate = item.createdDate,
+                        contactPerson = item.jobEmployer.contactPerson,
+                        companyLogo = item.jobEmployer.companyLogo,
+                        companyName = item.jobEmployer.companyName,
+                        fullAddress = item.jobEmployer.fullAddress,
+                        isFavourite = item.isFavorit,
 
+                    });
+
+                }
+                TempjobList = GetJobList;
             }
-            TempjobList = GetJobList;
-
             return GetJobList;
 
         }
@@ -155,27 +158,32 @@ namespace task2.ViewModels
         {
             try
             {
-                IsBusy = true;
+               // IsBusy = true;
 
                 if (JobsList.Count == 0)
                 {
                     pagenumber = 0;
                     var newresult = await GetData(pagenumber);
-                    JobsList.AddRange(newresult);
+                    //JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(newresult);
+
+                    foreach (var item in newresult)
+                    {
+                        JobsList.Add(item);
+                    }
                 }
                 JobsList.OnLoadMore = async () =>
                 {
                     IsLoadingIndicator = true;
-                    pagenumber = 5;
+                    pagenumber += 5;
                     var list = await GetData(pagenumber);
 
-                    canLoadMore = list.Count() != 0 ? true : false;
+                 
 
                     IsLoadingIndicator = false;
 
                     return list;
                 };
-                JobsList.OnCanLoadMore = () => JobsList.Count<=15;
+               
 
 
 
@@ -185,10 +193,7 @@ namespace task2.ViewModels
             {
                 throw e;
             }
-            finally
-            {
-                IsBusy = false;
-            }
+            
         }
     }
 }
