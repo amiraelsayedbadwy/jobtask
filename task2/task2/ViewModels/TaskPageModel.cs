@@ -24,7 +24,7 @@ namespace task2.ViewModels
             set
             {
                 _searchText = value;
-                OnSearchTextChanged(_searchText);
+              //  OnSearchTextChanged(_searchText);
                 RaisePropertyChanged("SearchText");
             }
         }
@@ -33,60 +33,124 @@ namespace task2.ViewModels
         public bool IsLoadingIndicator { get; set; }
         public bool IsBusy { get; set; }
         public int pagenumber { get; set; }
-        public InfiniteScrollCollection<JobEmployerDataModel> JobsList { get; set; }
+        public ObservableCollection<JobEmployerDataModel> JobsList { get; set; }
         public ObservableCollection<JobEmployerDataModel> GetJobList { get; set; }
         public ObservableCollection<JobEmployerDataModel> TempjobList { get; set; }
+        public ICommand ItemTresholdReachedCommand { get; set; }
+        public ICommand RefreshItemsCommand { get; set; }
+        public ICommand LoadItemsCommand { get; set; }
+        public const string ScrollToPreviousLastItem = "Scroll_ToPrevious";
+        public bool IsRefreshing { get; set; }
+       
+        public int ItemTreshold { get; set; }
+      
         public TaskPageModel()
         {
             canLoadMore = true;
-            JobsList = new InfiniteScrollCollection<JobEmployerDataModel>();
+            JobsList = new ObservableCollection<JobEmployerDataModel>();
             GetJobList = new ObservableCollection<JobEmployerDataModel>();
             TempjobList = new ObservableCollection<JobEmployerDataModel>();
-            Device.BeginInvokeOnMainThread(async () =>
-                {
-                  await  GetInfintyData(pagenumber);
-                });
-        }
-        public void OnSearchTextChanged(string text)
-        {
-
-            if (string.IsNullOrEmpty(SearchText) || string.IsNullOrWhiteSpace(SearchText))
+            LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
+            ItemTresholdReachedCommand = new Command(async () => await ItemsTresholdReached());
+            RefreshItemsCommand = new Command(async () =>
             {
-                if (TempjobList.Count > 0)
-                {
-                    JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
-                }
+                await ExecuteLoadItemsCommand();
+                IsRefreshing = false;
+            });
+           
+        }
 
-                //selecetedid = 0;
+        async Task ItemsTresholdReached()
+        {
+          
+
+            try
+            {
+                pagenumber = 5;
+                var items = await GetData(pagenumber);
+
+              //  var previousLastItem = JobsList.Last();
+                foreach (var item in items)
+                {
+                    JobsList.Add(item);
+                }
+               
+                if (items.Count() == 0)
+                {
+                    ItemTreshold = -1;
+                    return;
+                }
+              
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+
+        async Task ExecuteLoadItemsCommand()
+        {
+           
+
+            try
+            {
+                ItemTreshold = 1;
+                JobsList.Clear();
+                pagenumber = 0;
+               // JobsList = await GetData(pagenumber);
+                var items = await GetData(pagenumber);
+                foreach (var item in items)
+                {
+                    JobsList.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+           
+        }
+        //public void OnSearchTextChanged(string text)
+        //{
+
+        //    if (string.IsNullOrEmpty(SearchText) || string.IsNullOrWhiteSpace(SearchText))
+        //    {
+        //        if (TempjobList.Count > 0)
+        //        {
+        //            JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
+        //        }
+
+        //        //selecetedid = 0;
 
              
-            }
-            else
-            {
-                if (JobsList.Count > 0)
-                {
-                    JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
-                    var data = JobsList.Where(x => !string.IsNullOrEmpty(x.companyName) && x.companyName.ToLower().Contains(SearchText.ToLower())).ToList();
-                    InfiniteScrollCollection<JobEmployerDataModel> result = new InfiniteScrollCollection<JobEmployerDataModel>(data);
-                    if (result != null)
-                    {
-                        try
-                        {
-                            JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(result);
+        //    }
+        //    else
+        //    {
+        //        if (JobsList.Count > 0)
+        //        {
+        //            JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
+        //            var data = JobsList.Where(x => !string.IsNullOrEmpty(x.companyName) && x.companyName.ToLower().Contains(SearchText.ToLower())).ToList();
+        //            InfiniteScrollCollection<JobEmployerDataModel> result = new InfiniteScrollCollection<JobEmployerDataModel>(data);
+        //            if (result != null)
+        //            {
+        //                try
+        //                {
+        //                    JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(result);
                            
-                        }
-                        catch (Exception exception)
-                        {
-                            // isBusy = false;
-                            throw exception;
+        //                }
+        //                catch (Exception exception)
+        //                {
+        //                    // isBusy = false;
+        //                    throw exception;
                             
-                        }
+        //                }
 
-                    }
+        //            }
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
         public async Task<ObservableCollection<JobEmployerDataModel>> GetData(int pagenumber)
         {
             PageSourceModel data = new PageSourceModel
@@ -150,44 +214,44 @@ namespace task2.ViewModels
             return GetJobList;
 
         }
-        public async Task GetInfintyData(int pagenumber)
-        {
-            try
-            {
-                 IsBusy = true;
+        //public async Task GetInfintyData(int pagenumber)
+        //{
+        //    try
+        //    {
+        //         IsBusy = true;
 
-                if (JobsList.Count == 0)
-                {
-                    pagenumber = 0;
-                    var newresult = await GetData(pagenumber);
-                    JobsList.AddRange(newresult);
-                }
-                 JobsList.OnLoadMore = async () =>
-                    {
-                        IsLoadingIndicator = true;
-                        pagenumber += 5;
-                        var list = await GetData(pagenumber);
+        //        if (JobsList.Count == 0)
+        //        {
+        //            pagenumber = 0;
+        //            var newresult = await GetData(pagenumber);
+        //            JobsList = newresult;
+        //        }
+        //         JobsList.OnLoadMore = async () =>
+        //            {
+        //                IsLoadingIndicator = true;
+                        
+        //                var list = await GetData(pagenumber);
 
-                        canLoadMore = list.Count() != 0 ? true : false;
+        //                canLoadMore = list.Count() != 0 ? true : false;
 
-                        IsLoadingIndicator = false;
+        //                IsLoadingIndicator = false;
 
-                        return list;
-                    };
-                    JobsList.OnCanLoadMore = () => canLoadMore;
+        //                return list;
+        //            };
+        //            JobsList.OnCanLoadMore = () => canLoadMore;
                 
                 
 
 
-            }
-            catch(Exception e)
-            {
-                throw e;
-            }
-            finally
-            {
-                IsBusy = false;
-            }
-        }
+        //    }
+        //    catch(Exception e)
+        //    {
+        //        throw e;
+        //    }
+        //    finally
+        //    {
+        //        IsBusy = false;
+        //    }
+        //}
     }
 }
