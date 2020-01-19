@@ -17,5 +17,7 @@ namespace task2.Pages
             InitializeComponent();
             BindingContext = new TaskPageModel();
         }
+
+      
     }
 }

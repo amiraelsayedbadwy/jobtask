@@ -57,20 +57,34 @@
                 <Grid >
 
                     <SearchBar
-                        
+                        x:Name="searchBar"
                         Placeholder="Search"
                         HeightRequest="30"
                         TextColor="{x:StaticResource darkgrey}"
                         Text="{Binding SearchText}"
+                         SearchCommand="{Binding PerformSearch}"
+                   SearchCommandParameter="{Binding Text, Source={x:Reference searchBar}}"
                         />
+                   
                 </Grid>
             </Frame>
+            <Label Grid.Row="1"
+                   Margin="0,30,0,0"
+       HorizontalOptions="Center"
+       VerticalOptions="Center"
+                 
+                   HeightRequest="50"
+       IsVisible="{Binding Nodata}"
+       Text="There is no data for search"
+                   BackgroundColor="Black"
+       TextColor="{StaticResource darggrey2}"
+       />
 
             <ListView Grid.Row="1" x:Name="ItemsCollectionView"   
                             VerticalOptions="FillAndExpand"
                           HasUnevenRows="True"
                           SeparatorVisibility="None"
-                      
+                      IsVisible="{Binding showlist}"
                                 ItemsSource="{Binding JobsList}"
                            >
                 <ListView.Behaviors>
@@ -138,8 +152,7 @@
                     </Grid>
                 </ListView.Footer>
             </ListView>
-
-
+     
         </Grid>
 
 

@@ -15,23 +15,44 @@ using Xamarin.Forms.Extended;
 
 namespace task2.ViewModels
 {
-    public class TaskPageModel : FreshMvvm.FreshBasePageModel
+    public class TaskPageModel : BaseEntity
     {
-        private string _searchText;
-        public string SearchText
+        public string textSearch { get; set; }
+        public ICommand PerformSearch { get; set; }
+        
+        public string SearchText { get; set; }
+        private bool _nodata;
+        public bool Nodata
         {
-            get { return _searchText; }
+            get
+            {
+                return _nodata;
+            }
             set
             {
-                _searchText = value;
-                OnSearchTextChanged(_searchText);
-                RaisePropertyChanged("SearchText");
+                _nodata = value;
+                OnPropertyChanged("Nodata");
+                  
             }
         }
+        private bool _show;
+        public bool showlist
+        {
+            get
+            {
+                return _show;
+            }
+            set
+            {
+                _show = value;
+                OnPropertyChanged("showlist");
+
+            }
+        }
+        public bool thereisnodata { get; set; }
         public ICommand RefreshCommand { get; }
         public bool canLoadMore { get; set; }
         public bool IsLoadingIndicator { get; set; }
-        public bool IsBusy { get; set; }
         public int pagenumber { get; set; }
         public InfiniteScrollCollection<JobEmployerDataModel> JobsList { get; set; }
         public ObservableCollection<JobEmployerDataModel> GetJobList { get; set; }
@@ -39,50 +60,65 @@ namespace task2.ViewModels
         public TaskPageModel()
         {
             canLoadMore = true;
+            PerformSearch = new Command(PerformSearchExcute);
             JobsList = new InfiniteScrollCollection<JobEmployerDataModel>();
             GetJobList = new ObservableCollection<JobEmployerDataModel>();
             TempjobList = new ObservableCollection<JobEmployerDataModel>();
+            showlist = true;
+            thereisnodata = false;
             Device.BeginInvokeOnMainThread(async () =>
             {
+               
+               
                 await GetInfintyData(pagenumber);
             });
         }
-        public void OnSearchTextChanged(string text)
+
+        private void PerformSearchExcute()
         {
 
-            if (string.IsNullOrEmpty(SearchText) || string.IsNullOrWhiteSpace(SearchText))
+            if (string.IsNullOrEmpty(SearchText))
             {
-                if (TempjobList.Count > 0)
-                {
-                    JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
-                }
-
-                //selecetedid = 0;
-
-
+                JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
             }
             else
             {
-                if (JobsList.Count > 0)
+                JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
+                List<JobEmployerDataModel> result = JobsList.Where(x => !string.IsNullOrEmpty(x.companyName) && x.companyName.ToLower().Contains(SearchText.ToLower())).ToList();
+                if (result.Count > 0)
                 {
-                    JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
-                    var data = JobsList.Where(x => !string.IsNullOrEmpty(x.companyName) && x.companyName.ToLower().Contains(SearchText.ToLower())).ToList();
-                    InfiniteScrollCollection<JobEmployerDataModel> result = new InfiniteScrollCollection<JobEmployerDataModel>(data);
-                    if (result != null)
-                    {
-                        try
-                        {
-                            JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(result);
+                    showlist = true;
+                    thereisnodata = false;
+                    JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(result);
+                   
+                }
+                else
+                {
+                    showlist = false;
+                    thereisnodata = true;
 
-                        }
-                        catch (Exception exception)
-                        {
-                            // isBusy = false;
-                            throw exception;
+                }
+            }
 
-                        }
 
-                    }
+        }
+
+        public void OnSearchTextChanged()
+        {
+            if (string.IsNullOrEmpty(SearchText))
+            {
+                JobsList=new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
+            }
+            else
+            {
+                JobsList = new InfiniteScrollCollection<JobEmployerDataModel>(TempjobList);
+                List<JobEmployerDataModel> result = JobsList.Where(x => !string.IsNullOrEmpty(x.companyName) && x.companyName.ToLower().Contains(SearchText.ToLower())).ToList();
+                if (result.Count>0)
+                    JobsList = new InfiniteScrollCollection < JobEmployerDataModel >( result);
+                else
+                {
+                    showlist = false;
+                    thereisnodata = true;
 
                 }
             }
